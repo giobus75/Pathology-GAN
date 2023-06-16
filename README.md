@@ -33,6 +33,75 @@
 }
 ```
 
+## Quick Start
+### Environment setup
+To set up the environment, follow these steps:
+
+1. Clone the repository to your user directory by running the following command:
+```bash
+cd ~
+git clone https://github.com/giobus75/Pathology-GAN.git
+```
+
+2. Build the Docker image using the following command: 
+
+```bash
+cd ~/Pathology-GAN
+docker build -t pathologygan_tf -f Dockerfile .
+```
+
+3. Run the container. Make sure to use the -v option to specify the local path of the Pathology-GAN folder on your host machine. This is necessary to access it from the container at /home/user/Pathology-GAN. Run the command below:
+
+```bash
+docker run -d -it --gpus '"device=1"' -v host_path_of_Pathology-GAN:/home/user/Pathology-GAN:rw -p 8999:8888  --name PathologyGAN --cap-add=sys_nice pathologygan_tf:latest fish
+```
+
+### Sample patch generation
+To generate some patches, follow these steps:
+
+1. Log in to the container using the following command:
+```bash
+docker exec -ti PathologyGAN fish
+```
+
+2. create two new folders:
+
+```bash
+cd ~/Pathology-GAN
+mkdir dataset
+mkdir ckpt
+```
+
+3. Download a pre-processed HDF5 file with patches of 224x224x3 resolution [here](https://drive.google.com/open?id=1LpgW85CVA48C8LnpmsDMdHqeCGHKsAxw). Move the file named **vgh_nki.tar.gz** to the dataset folder and extract its contents by running the following command:
+
+```bash
+cd ~/Pathology-GAN/dataset
+tar xvfz vgh_nki.tar.gz
+```
+
+4. Download the pretrained model for the breast cancer from [here](https://figshare.com/s/0a311b5418f21ab2ebd4). Once downloaded, move the file named **PathologyGAN.ckt.tar.xz** to the ```~/Pathology-GAN/ckpt``` folder and extract it using the following command:
+
+```bash
+cd ~/Pathology-GAN/ckpt
+tar xvf PathologyGAN.ckt.tar.xz
+```
+
+After extraction, the ```ckpt``` folder should contain three files:
+```
+PathologyGAN.ckt.data-00000-of-00001
+PathologyGAN.ckt.index
+PathologyGAN.ckt.meta
+```
+
+5. To generate a specified number of patches (25 in this example), run the following command:
+```bash
+cd ~/Pathology-GAN
+chmod 700 generate_patch.sh
+./generate_patch.sh 25
+```
+
+The generated patches will be found int the ```evaluation/PathologyGAN/vgh_nki/he/h224_w224_n3_zdim200/generated_images/``` folder as **.png** files
+
 ## Demo Materials:
 * [**224x224 and 448x448 examples**](https://github.com/AdalbertoCq/Pathology-GAN/tree/master/demos/range_images):
   - **(a)** Generated images with PathologyGAN, **(b)** Real tissue images.
